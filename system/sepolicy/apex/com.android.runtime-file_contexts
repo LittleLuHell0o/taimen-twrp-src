@@ -1,0 +1,1 @@
+# 精简树补丁：原文件属 system/sepolicy 裁剪项，此处放空壳以通过 apex file_contexts 路径校验

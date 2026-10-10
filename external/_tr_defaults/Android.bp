@@ -1,0 +1,35 @@
+// 精简树补丁：build/soong 裁掉了 hidl/aidl/cc clang 配置里的若干 defaults，
+// TWRP 自己的 bp 又引用了树里并不存在的 twrp_defaults，
+// 这里统一补成空的 cc_defaults，只为让 soong 能解析全树 Android.bp。
+// 这些模块与 taimen recovery 构建无关，不参与实际编译。
+cc_defaults {
+    name: "llvm-build-host-tools-defaults",
+}
+
+cc_defaults {
+    name: "selinux_policy_version",
+}
+
+cc_defaults {
+    name: "hidl-module-defaults",
+}
+
+cc_defaults {
+    name: "libhwbinder-impl-shared-libs",
+}
+
+cc_defaults {
+    name: "llvm-host-defaults",
+}
+
+cc_defaults {
+    name: "llvm-defaults",
+}
+
+cc_defaults {
+    name: "libadbd_binary_dependencies",
+}
+
+cc_defaults {
+    name: "hwbinder_benchmark_pgo",
+}

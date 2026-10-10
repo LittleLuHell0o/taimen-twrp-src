@@ -1,0 +1,41 @@
+#!/bin/bash
+# ckati dispatcher for the trimmed TWRP tree.
+#
+# AOSP's ckati has two distinct jobs:
+#   1. `-f <ninja file>`  -> the "regen" step: re-emit the ninja file and run
+#                            it (this is what actually builds soong_build and
+#                            then emits <builddir>/build.ninja).
+#   2. `-f <make file>`   -> parse the makefiles and emit make vars / ninja.
+#
+# Blueprint already emits a syntactically valid .bootstrap/build.ninja, so job 1
+# is reduced to "copy + run it".  Upstream kati cannot even parse ninja syntax,
+# so real kati is only used for job 2.
+d=$(cd "$(dirname "$0")" && pwd)
+ninja="$d/../ninja"
+if [ ! -x "$ninja" ]; then
+  ninja="$d/../../../../_dl/ninja"
+fi
+
+src=""
+args=()
+while [ $# -gt 0 ]; do
+  if [ "$1" = "-f" ]; then src="$2"; shift 2; else args+=("$1"); shift; fi
+done
+
+if [ -z "$src" ] || [ ! -f "$src" ]; then
+  exec "$d/ckati.real" "$@"
+fi
+
+case "$src" in
+  *.ninja)
+    cp -f "$src" "$PWD/build.ninja" || exit 1
+    soongdir=$(dirname "$(dirname "$(cd "$(dirname "$src")" && pwd)")")
+    if [ -d "$soongdir" ]; then
+      cp -f "$src" "$soongdir/build.ninja" || exit 1
+    fi
+    exec "$ninja" -f "$src"
+    ;;
+  *)
+    exec "$d/ckati.real" -f "$src" "${args[@]}"
+    ;;
+esac

@@ -1,0 +1,19 @@
+// 精简源码树补丁：system/liblog 整包被裁，bionic 的 libstdc++ / libc / libm
+// 模块声明了 liblog_headers / gwp_asan_headers 依赖却找不到定义，会触发构建期
+// "missing dependencies" 硬失败。这里用 filegroup 桩顶上。
+//
+// 为什么不是 cc_library_headers：桩模块用 cc_library_headers 时，soong 会自动
+// 给它加上对 libc 的默认依赖（vendor 包下没有自己的 libc，就用 bionic 的），
+// 而 libc 反过来依赖 gwp_asan_headers，直接构成 dependency cycle 解析失败。
+// 换成 filegroup 就不进 cc 的依赖图，也不会被自动加 libc 依赖。
+filegroup {
+    name: "liblog_headers",
+    srcs: ["prebuilt_libs/empty.s"],
+    visibility: ["//bionic/libc:__subpackages__"],
+}
+
+filegroup {
+    name: "gwp_asan_headers",
+    srcs: ["prebuilt_libs/empty.s"],
+    visibility: ["//bionic/libc:__subpackages__"],
+}
